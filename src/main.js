@@ -179,6 +179,38 @@ function getSupabaseAuthErrorMessage(error) {
   return '';
 }
 
+function footerHTML() {
+  return `
+    <footer class="tfr-footer">
+      <div class="tfr-footer-inner">
+        <div class="tfr-badge">
+          <span class="tfr-badge-icon">⚡</span>
+          <span class="tfr-badge-text">Cardápio Digital</span>
+        </div>
+
+        <p class="tfr-tagline">
+          Tecnologia que faz seu negócio vender mais
+        </p>
+
+        <a
+          class="tfr-link"
+          href="https://www.tfrtech.com.br"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="tfr-link-logo">TFR<span>Tech</span></span>
+          <span class="tfr-link-arrow">↗</span>
+        </a>
+
+        <p class="tfr-cta">
+          Quer um cardápio digital para o seu restaurante?<br>
+          <strong>Acesse www.tfrtech.com.br</strong>
+        </p>
+      </div>
+    </footer>
+  `;
+}
+
 function render() {
   if (!root) {
     return;
@@ -199,6 +231,9 @@ function render() {
             </p>
           </div>
         </section>
+
+        ${footerHTML()}
+
       </main>
     `;
 
@@ -225,6 +260,9 @@ function render() {
 
           </div>
         </section>
+
+        ${footerHTML()}
+
       </main>
     `;
 
@@ -275,6 +313,9 @@ function render() {
           </div>
 
         </section>
+
+        ${footerHTML()}
+
       </main>
     `;
 
@@ -441,6 +482,9 @@ function render() {
           </div>
 
         </section>
+
+        ${footerHTML()}
+
       </main>
     `;
 
@@ -512,6 +556,9 @@ function render() {
           </div>
 
         </section>
+
+        ${footerHTML()}
+
       </main>
     `;
 
@@ -780,6 +827,9 @@ function render() {
           </section>
 
         </section>
+
+        ${footerHTML()}
+
       </main>
     `;
 
@@ -1261,6 +1311,8 @@ function render() {
         </section>
 
       </section>
+
+      ${footerHTML()}
 
     </main>
   `;

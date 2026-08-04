@@ -1140,3 +1140,160 @@ p.status-message[style*="text-align:center"] {
   from { opacity: 0; transform: translateY(10px) scale(.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* ============================================================
+   RODAPÉ TFR TECH — Propaganda elegante
+   ============================================================ */
+
+.tfr-footer {
+  width: 100%;
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
+.tfr-footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px 18px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(10px);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--t) ease, background var(--t) ease;
+}
+
+.tfr-footer-inner:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(249, 115, 22, 0.22);
+}
+
+/* Linha de brilho no topo */
+.tfr-footer-inner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(249, 115, 22, 0.50) 30%,
+    rgba(251, 146, 60, 0.50) 70%,
+    transparent);
+}
+
+/* Reflexo sutil no fundo */
+.tfr-footer-inner::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 60px;
+  background: radial-gradient(ellipse, rgba(249,115,22,.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Badge "Cardápio Digital" */
+.tfr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+  background: rgba(249, 115, 22, 0.12);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+}
+
+.tfr-badge-icon {
+  font-size: 13px;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+.tfr-badge-text {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fdba74;
+}
+
+/* Tagline */
+.tfr-tagline {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.50);
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Link principal — nome da empresa */
+.tfr-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: transform var(--t-fast) var(--ease-spring);
+}
+
+.tfr-link:hover {
+  transform: translateY(-2px);
+}
+
+.tfr-link-logo {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #fff;
+  background: linear-gradient(135deg, #fff 0%, #fed7aa 50%, #fb923c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.tfr-link-logo span {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tfr-link-arrow {
+  font-size: 14px;
+  color: rgba(249, 115, 22, 0.80);
+  transition: transform var(--t-fast) ease;
+  -webkit-text-fill-color: rgba(249, 115, 22, 0.80);
+}
+
+.tfr-link:hover .tfr-link-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* CTA — chamada de ação */
+.tfr-cta {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.38);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.tfr-cta strong {
+  color: rgba(249, 115, 22, 0.75);
+  font-weight: 700;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .tfr-footer-inner {
+    padding: 16px 18px 14px;
+    gap: 8px;
+  }
+
+  .tfr-link-logo {
+    font-size: 1.1rem;
+  }
+}
