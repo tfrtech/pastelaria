@@ -342,6 +342,7 @@ function render() {
             <p
               class="card-description"
               style="text-align:center;"
+
             >
               Informe seus dados para fazer o pedido.
             </p>
@@ -355,13 +356,14 @@ function render() {
               "
             >
 
-              <div>
+              <div style="align-items:center;">
                 <label
                   for="customer-name"
                   style="
                     display:block;
                     font-weight:600;
                     margin-bottom:6px;
+                    border-radius:4px;
                   "
                 >
                   Seu nome
@@ -1772,14 +1774,31 @@ async function loadData() {
     readRoute();
 
   if (!route) {
+    // ── MODO PREVIEW (sem rota de mesa) ──────────────────────────────
+    // Carrega dados fictícios para visualizar o design localmente.
+    // Em produção, o QR Code sempre fornece a rota correta.
     state.loading = false;
-
-    state.error =
-      'A URL da mesa está incompleta. Use o QR Code com /mesa/:id/:codigo.';
-
+    state.table = { id: 0, name: 'Mesa 1 (Preview)', code: 'demo' };
+    state.storeName = 'Pastelaria Demo';
+    state.logoEmoji = '🥟';
+    state.logoUrl = null;
+    state.categories = ['Pastéis', 'Bebidas', 'Sobremesas'];
+    state.products = [
+      { id: 'p1', name: 'Pastel de Carne', description: 'Carne moída temperada, ovo e azeitona.', price: 12.9, category: 'Pastéis', stock: 10, image: '' },
+      { id: 'p2', name: 'Pastel de Queijo', description: 'Queijo mussarela derretido, crocante e saboroso.', price: 11.5, category: 'Pastéis', stock: 8, image: '' },
+      { id: 'p3', name: 'Pastel de Frango', description: 'Frango desfiado com catupiry e milho.', price: 13.5, category: 'Pastéis', stock: 6, image: '' },
+      { id: 'p4', name: 'Pastel de Pizza', description: 'Molho de tomate, mussarela e azeitona.', price: 12.0, category: 'Pastéis', stock: 5, image: '' },
+      { id: 'p5', name: 'Caldo de Cana', description: 'Fresquinho, natural e gelado.', price: 6.0, category: 'Bebidas', stock: 20, image: '' },
+      { id: 'p6', name: 'Refrigerante Lata', description: 'Coca-Cola, Guaraná ou Sprite.', price: 5.5, category: 'Bebidas', stock: 15, image: '' },
+      { id: 'p7', name: 'Água Mineral', description: '500ml com ou sem gás.', price: 3.0, category: 'Bebidas', stock: 30, image: '' },
+      { id: 'p8', name: 'Pastel Doce Nutella', description: 'Recheado com Nutella e morango.', price: 15.0, category: 'Sobremesas', stock: 4, image: '' },
+    ];
+    state.statusMessage = '🎨 Modo preview — conecte ao Supabase para uso real.';
+    state.customerName = 'Visitante';
+    state.step = 'menu';
     render();
-
     return;
+    // ────────────────────────────────────────────────────────────────
   }
 
   try {
