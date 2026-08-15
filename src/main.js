@@ -1659,23 +1659,15 @@ async function submitOrder() {
       product_id:
         item.product.id,
 
-      product_name:
-        item.product.name,
-
-      product_price:
-        Number(item.product.price),
-
       quantity:
         item.quantity,
 
+      // O banco Safe4 recalcula nome/preço e valida os complementos.
+      // O cliente envia somente os identificadores necessários.
       complements:
         item.complements.map(
           (comp) => ({
             id: comp.id,
-            name: comp.name,
-            price: Number(
-              comp.price || 0
-            ),
           })
         ),
     }));
@@ -1709,6 +1701,9 @@ async function submitOrder() {
       {
         p_table_id:
           Number(state.table.id),
+
+        p_table_code:
+          state.table.code,
 
         p_table_name:
           state.table.name,
@@ -1773,6 +1768,37 @@ async function submitOrder() {
       state.statusMessage =
         'Informe seu nome antes de enviar o pedido.';
 
+      render();
+      return;
+    }
+
+    if (
+      String(error.message || '').includes('INVALID_TABLE_QR') ||
+      String(error.message || '').includes('INVALID_TABLE')
+    ) {
+      state.error =
+        'Este QR Code não é válido para esta mesa. Solicite um novo QR Code ao estabelecimento.';
+      render();
+      return;
+    }
+
+    if (String(error.message || '').includes('RATE_LIMITED')) {
+      state.statusMessage =
+        'Muitos pedidos em pouco tempo. Aguarde um momento e tente novamente.';
+      render();
+      return;
+    }
+
+    if (String(error.message || '').includes('PRODUCT_NOT_FOUND_OR_OUT_OF_STOCK')) {
+      state.statusMessage =
+        'Um dos produtos ficou indisponível. Atualize o cardápio e tente novamente.';
+      render();
+      return;
+    }
+
+    if (String(error.message || '').includes('INVALID_COMPLEMENT')) {
+      state.statusMessage =
+        'Um dos complementos selecionados não está mais disponível. Atualize o pedido.';
       render();
       return;
     }
