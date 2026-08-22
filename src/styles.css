@@ -307,13 +307,13 @@ img {
   overflow: hidden;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #fed7aa, #fb923c);
-  color: #7c2d12;
+  background: #ffffff;
+  color: #111827;
   font-size: 1.8rem;
   flex-shrink: 0;
   box-shadow:
-    0 0 0 3px rgba(255,255,255,.18),
-    0 8px 24px rgba(249,115,22,.32);
+    0 0 0 3px rgba(255,255,255,.95),
+    0 8px 24px rgba(15,23,42,.12);
   position: relative;
   transition: transform var(--t) var(--ease-spring);
 }
