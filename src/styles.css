@@ -831,9 +831,127 @@ img {
   transition: transform var(--t) ease;
 }
 
+.product-image-button {
+  padding: 0;
+  border: none;
+  cursor: zoom-in;
+}
+
+.product-image-button:focus-visible {
+  outline: 3px solid rgba(249,115,22,.36);
+  outline-offset: 3px;
+}
+
 .product-card:hover .product-image img,
 .cart-item:hover .cart-image img {
   transform: scale(1.08);
+}
+
+.product-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, .58);
+  backdrop-filter: blur(10px);
+  animation: fadeIn var(--t-fast) ease both;
+}
+
+.product-modal {
+  width: min(420px, 100%);
+  max-height: min(92vh, 760px);
+  overflow-y: auto;
+  border-radius: var(--r-xl);
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  animation: modalUp var(--t) var(--ease) both;
+}
+
+.product-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-full);
+  background: rgba(255,255,255,.92);
+  color: var(--text-strong);
+  font-size: 24px;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+.product-modal-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 360px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fde68a, #fdba74);
+  color: #92400e;
+  font-size: 4rem;
+  font-weight: 900;
+}
+
+.product-modal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-modal-body {
+  padding: 22px;
+  display: grid;
+  gap: 14px;
+}
+
+.product-modal-title {
+  color: var(--text-strong);
+  font-size: 1.55rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.product-modal-description {
+  color: var(--text-muted);
+  font-size: .95rem;
+  line-height: 1.6;
+}
+
+.product-modal-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  border-radius: var(--r);
+  background: var(--surface-2);
+}
+
+.product-modal-meta strong {
+  color: var(--accent-dark);
+  font-size: 1.25rem;
+}
+
+.product-modal-meta span {
+  color: var(--text-muted);
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+@keyframes modalUp {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .product-main,

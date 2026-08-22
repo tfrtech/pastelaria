@@ -24,6 +24,7 @@ const state = {
   products: [],
   categories: [],
   cart: [],
+  selectedProductId: null,
 
   customerName: '',
   customerPhone: '',
@@ -208,6 +209,111 @@ function footerHTML() {
         </p>
       </div>
     </footer>
+  `;
+}
+
+function productModalHTML() {
+  if (!state.selectedProductId) {
+    return '';
+  }
+
+  const product = state.products.find(
+    (item) =>
+      String(item.id) ===
+      String(state.selectedProductId)
+  );
+
+  if (!product) {
+    return '';
+  }
+
+  const available =
+    Number(product.stock) > 0;
+
+  return `
+    <div class="product-modal-backdrop" data-action="close-product">
+      <section
+        class="product-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="${escapeHtml(product.name)}"
+      >
+        <button
+          type="button"
+          class="product-modal-close"
+          data-action="close-product"
+          aria-label="Fechar detalhes do produto"
+        >
+          ×
+        </button>
+
+        <div class="product-modal-image">
+          ${product.image
+      ? `
+              <img
+                src="${escapeHtml(product.image)}"
+                alt="${escapeHtml(product.name)}"
+              >
+            `
+      : `
+              <span>
+                ${escapeHtml(
+        product.name
+          .slice(0, 1)
+          .toUpperCase()
+      )}
+              </span>
+            `
+    }
+        </div>
+
+        <div class="product-modal-body">
+          <p class="eyebrow">Detalhes do produto</p>
+
+          <h2 class="product-modal-title">
+            ${escapeHtml(product.name)}
+          </h2>
+
+          ${product.description
+      ? `
+              <p class="product-modal-description">
+                ${escapeHtml(product.description)}
+              </p>
+            `
+      : ''
+    }
+
+          <div class="product-modal-meta">
+            <strong>
+              ${available
+      ? money(product.price)
+      : 'Indisponível'
+    }
+            </strong>
+            <span>
+              ${available
+      ? `${Number(product.stock)} em estoque`
+      : 'Sem estoque'
+    }
+            </span>
+          </div>
+
+          ${available
+      ? `
+              <button
+                type="button"
+                class="primary-button"
+                data-action="add-product"
+                data-product-id="${escapeHtml(product.id)}"
+              >
+                Adicionar ao carrinho
+              </button>
+            `
+      : ''
+    }
+        </div>
+      </section>
+    </div>
   `;
 }
 
@@ -875,7 +981,13 @@ function render() {
             return `
                   <article class="product-card">
 
-                    <div class="product-image">
+                    <button
+                      type="button"
+                      class="product-image product-image-button"
+                      data-action="open-product"
+                      data-product-id="${escapeHtml(product.id)}"
+                      aria-label="Ver detalhes de ${escapeHtml(product.name)}"
+                    >
 
                       ${product.image
                 ? `
@@ -899,7 +1011,7 @@ function render() {
                           `
               }
 
-                    </div>
+                    </button>
 
                     <div class="product-main">
 
@@ -1035,7 +1147,13 @@ function render() {
           return `
                   <article class="product-card">
 
-                    <div class="product-image">
+                    <button
+                      type="button"
+                      class="product-image product-image-button"
+                      data-action="open-product"
+                      data-product-id="${escapeHtml(product.id)}"
+                      aria-label="Ver detalhes de ${escapeHtml(product.name)}"
+                    >
 
                       ${product.image
               ? `
@@ -1059,7 +1177,7 @@ function render() {
                           `
             }
 
-                    </div>
+                    </button>
 
                     <div class="product-main">
 
@@ -1291,6 +1409,8 @@ function render() {
 
       </section>
 
+      ${productModalHTML()}
+
       ${footerHTML()}
 
     </main>
@@ -1314,6 +1434,15 @@ function bindActions() {
     document.querySelector(
       '#customer-form'
     );
+
+  document
+    .querySelectorAll('.product-modal')
+    .forEach((element) => {
+      element.addEventListener(
+        'click',
+        (event) => event.stopPropagation()
+      );
+    });
 
   /*
    * NOME
@@ -1454,8 +1583,33 @@ async function handleAction(event) {
    * ABRIR CARRINHO
    */
   if (action === 'open-cart') {
+    state.selectedProductId = null;
     state.step = 'cart';
 
+    render();
+    return;
+  }
+
+  /*
+   * DETALHES DO PRODUTO
+   */
+  if (action === 'open-product') {
+    const product = state.products.find(
+      (item) =>
+        String(item.id) ===
+        String(productId)
+    );
+
+    if (product) {
+      state.selectedProductId = product.id;
+      render();
+    }
+
+    return;
+  }
+
+  if (action === 'close-product') {
+    state.selectedProductId = null;
     render();
     return;
   }
@@ -1517,6 +1671,8 @@ async function handleAction(event) {
 
     state.statusMessage =
       'Produto adicionado ao carrinho.';
+
+    state.selectedProductId = null;
 
     render();
     return;
@@ -2075,4 +2231,3 @@ async function loadData() {
 render();
 
 loadData();
-
