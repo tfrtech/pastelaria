@@ -282,19 +282,6 @@ function productModalHTML() {
             `
       : ''
     }
-
-          <div class="product-modal-meta">
-            <strong>
-              ${available
-      ? money(product.price)
-      : 'Indisponível'
-    }
-            </strong>
-            <span>
-              ${available
-      ? `${Number(product.stock)} em estoque`
-      : 'Sem estoque'
-    }
             </span>
           </div>
 
