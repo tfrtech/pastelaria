@@ -2160,6 +2160,13 @@ async function submitOrder() {
       return;
     }
 
+    if (String(error.message || '').includes('TOO_MANY_COMPLEMENTS')) {
+      state.statusMessage =
+        'Este produto permite menos complementos do que foi selecionado. Revise os complementos e tente novamente.';
+      render();
+      return;
+    }
+
     if (String(error.message || '').includes('INVALID_COMPLEMENT')) {
       state.statusMessage =
         'Um dos complementos selecionados não está mais disponível. Atualize o pedido.';
