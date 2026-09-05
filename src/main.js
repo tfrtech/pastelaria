@@ -25,6 +25,8 @@ const state = {
   categories: [],
   cart: [],
   selectedProductId: null,
+  selectedComplementIds: new Set(),
+  productComplements: {},
 
   customerName: '',
   customerPhone: '',
@@ -139,6 +141,108 @@ function cartTotal() {
   }, 0);
 }
 
+function selectedComplementsFor(productId) {
+  const complements =
+    state.productComplements[String(productId)] || [];
+
+  return complements.filter((complement) =>
+    state.selectedComplementIds.has(String(complement.id))
+  );
+}
+
+function productQuantityInCart(productId) {
+  return state.cart.reduce(
+    (sum, item) =>
+      String(item.product.id) === String(productId)
+        ? sum + item.quantity
+        : sum,
+    0
+  );
+}
+
+async function loadProductComplements(productId) {
+  const key = String(productId);
+
+  if (state.productComplements[key]) {
+    return state.productComplements[key];
+  }
+
+  if (!state.supabase) {
+    state.productComplements[key] = [];
+    return [];
+  }
+
+  const { data, error } =
+    await state.supabase.rpc(
+      'get_public_product_complements',
+      {
+        p_product_id:
+          productId,
+      }
+    );
+
+  if (error) {
+    throw error;
+  }
+
+  state.productComplements[key] =
+    (data || []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: Number(item.price || 0),
+    }));
+
+  return state.productComplements[key];
+}
+
+function addProductToCart(product, complements = []) {
+  const totalInCart =
+    productQuantityInCart(product.id);
+
+  if (
+    totalInCart >=
+    Number(product.stock)
+  ) {
+    state.statusMessage =
+      'Estoque insuficiente para adicionar mais unidades.';
+
+    render();
+    return;
+  }
+
+  const currentKey =
+    cartKey(product.id, complements);
+
+  const current =
+    state.cart.find(
+      (item) =>
+        cartKey(
+          item.product.id,
+          item.complements
+        ) === currentKey
+    );
+
+  if (current) {
+    current.quantity += 1;
+  } else {
+    state.cart.push({
+      product,
+      quantity: 1,
+      complements,
+    });
+  }
+
+  state.statusMessage =
+    complements.length > 0
+      ? 'Produto com complementos adicionado ao carrinho.'
+      : 'Produto adicionado ao carrinho.';
+
+  state.selectedProductId = null;
+  state.selectedComplementIds = new Set();
+
+  render();
+}
+
 function getClient() {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     throw new Error(
@@ -229,6 +333,20 @@ function productModalHTML() {
 
   const available =
     Number(product.stock) > 0;
+  const complements =
+    state.productComplements[String(product.id)] || [];
+  const selectedComplements =
+    selectedComplementsFor(product.id);
+  const complementsTotal =
+    selectedComplements.reduce(
+      (sum, complement) =>
+        sum + Number(complement.price || 0),
+      0
+    );
+  const maxComplements =
+    Number(product.maxComplements || 0);
+  const hasLimit =
+    maxComplements > 0;
 
   return `
     <div class="product-modal-backdrop" data-action="close-product">
@@ -282,7 +400,60 @@ function productModalHTML() {
             `
       : ''
     }
-            </span>
+
+          ${complements.length
+      ? `
+              <div class="complements-box">
+                <p class="complements-title">
+                  Complementos
+                </p>
+
+                ${hasLimit
+          ? `
+                    <p class="complements-limit">
+                      Escolha ate ${maxComplements}
+                    </p>
+                  `
+          : ''
+        }
+
+                <div class="complements-list">
+                  ${complements
+          .map((complement) => {
+            const checked =
+              state.selectedComplementIds.has(
+                String(complement.id)
+              );
+            const disabled =
+              hasLimit &&
+              !checked &&
+              state.selectedComplementIds.size >=
+              maxComplements;
+
+            return `
+                      <label class="complement-option ${disabled ? 'is-disabled' : ''}">
+                        <input
+                          type="checkbox"
+                          data-action="toggle-complement"
+                          data-complement-id="${escapeHtml(complement.id)}"
+                          ${checked ? 'checked' : ''}
+                          ${disabled ? 'disabled' : ''}
+                        >
+                        <span>${escapeHtml(complement.name)}</span>
+                        <strong>+ ${money(complement.price)}</strong>
+                      </label>
+                    `;
+          })
+          .join('')}
+                </div>
+              </div>
+            `
+      : ''
+    }
+
+          <div class="product-modal-total">
+            <span>Total unitario</span>
+            <strong>${money(Number(product.price) + complementsTotal)}</strong>
           </div>
 
           ${available
@@ -290,7 +461,7 @@ function productModalHTML() {
               <button
                 type="button"
                 class="primary-button"
-                data-action="add-product"
+                data-action="confirm-product-add"
                 data-product-id="${escapeHtml(product.id)}"
               >
                 Adicionar ao carrinho
@@ -1540,6 +1711,10 @@ async function handleAction(event) {
     event.currentTarget.getAttribute(
       'data-key'
     );
+  const complementId =
+    event.currentTarget.getAttribute(
+      'data-complement-id'
+    );
 
   /*
    * NOVO PEDIDO
@@ -1571,6 +1746,7 @@ async function handleAction(event) {
    */
   if (action === 'open-cart') {
     state.selectedProductId = null;
+    state.selectedComplementIds = new Set();
     state.step = 'cart';
 
     render();
@@ -1588,6 +1764,14 @@ async function handleAction(event) {
     );
 
     if (product) {
+      try {
+        await loadProductComplements(product.id);
+      } catch {
+        state.statusMessage =
+          'Nao foi possivel carregar os complementos deste produto.';
+      }
+
+      state.selectedComplementIds = new Set();
       state.selectedProductId = product.id;
       render();
     }
@@ -1597,6 +1781,38 @@ async function handleAction(event) {
 
   if (action === 'close-product') {
     state.selectedProductId = null;
+    state.selectedComplementIds = new Set();
+    render();
+    return;
+  }
+
+  if (action === 'toggle-complement') {
+    if (!complementId || !state.selectedProductId) {
+      return;
+    }
+
+    const product =
+      state.products.find(
+        (item) =>
+          String(item.id) ===
+          String(state.selectedProductId)
+      );
+
+    const maxComplements =
+      Number(product?.maxComplements || 0);
+    const next =
+      new Set(state.selectedComplementIds);
+
+    if (next.has(String(complementId))) {
+      next.delete(String(complementId));
+    } else if (
+      maxComplements === 0 ||
+      next.size < maxComplements
+    ) {
+      next.add(String(complementId));
+    }
+
+    state.selectedComplementIds = next;
     render();
     return;
   }
@@ -1627,41 +1843,46 @@ async function handleAction(event) {
       return;
     }
 
-    const current =
-      state.cart.find(
-        (item) =>
-          String(item.product.id) ===
-          String(productId) &&
-          item.complements.length === 0
-      );
+    if (action === 'add-product') {
+      try {
+        const complements =
+          await loadProductComplements(product.id);
 
-    if (current) {
-      if (
-        current.quantity >=
-        Number(product.stock)
-      ) {
+        if (complements.length > 0) {
+          state.selectedComplementIds = new Set();
+          state.selectedProductId = product.id;
+          render();
+          return;
+        }
+      } catch {
         state.statusMessage =
-          'Estoque insuficiente para adicionar mais unidades.';
+          'Nao foi possivel carregar os complementos deste produto.';
 
         render();
         return;
       }
-
-      current.quantity += 1;
-    } else {
-      state.cart.push({
-        product,
-        quantity: 1,
-        complements: [],
-      });
     }
 
-    state.statusMessage =
-      'Produto adicionado ao carrinho.';
+    addProductToCart(product, []);
+    return;
+  }
 
-    state.selectedProductId = null;
+  if (action === 'confirm-product-add') {
+    const product =
+      state.products.find(
+        (item) =>
+          String(item.id) ===
+          String(productId)
+      );
 
-    render();
+    if (!product) {
+      return;
+    }
+
+    addProductToCart(
+      product,
+      selectedComplementsFor(product.id)
+    );
     return;
   }
 
@@ -2095,6 +2316,9 @@ async function loadData() {
 
           image:
             product.image ?? '',
+
+          maxComplements:
+            Number(product.max_complements ?? 0),
         }));
 
     const sortMap =
